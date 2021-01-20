@@ -67,6 +67,5 @@ exports.getTalkByRating = async (req, res, next) => {
   const talkId = req.body.talkId;
   const rating = req.body.rating;
   const talkByRating = await Review.find({ talkId, rating });
-  console.log(talkByRating);
-  res.send("Rating");
+  return res.status(200).json({ success: true, data: talkByRating });
 };
