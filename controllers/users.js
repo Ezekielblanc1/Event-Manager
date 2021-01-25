@@ -59,7 +59,7 @@ exports.login = async (req, res, next) => {
     );
     return res.status(200).send({ _id: user._id, token });
   } catch (error) {
-   return next(new ErrorResponse())
+    return next(new ErrorResponse());
   }
 };
 
@@ -68,3 +68,5 @@ exports.getUsersByLocation = async (req, res, next) => {
   const users = await User.find({ location });
   return res.status(200).json({ success: true, data: users });
 };
+
+exports.getUsersCount = async (req, res, next) => {};
