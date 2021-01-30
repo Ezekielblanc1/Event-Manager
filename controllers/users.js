@@ -1,10 +1,13 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const { randomBytes } = require("crypto");
 const User = require("../models/User");
 const { cloudinaryConfig } = require("../config/cloudinary");
 const { mailerTester } = require("../helpers/emailHelper");
 const cloudinary = require("cloudinary");
 const ErrorResponse = require("../utils/errorResponse");
+
+
 
 exports.signUp = async (req, res, next) => {
   const { password, email, profileImage } = req.body;
@@ -61,6 +64,41 @@ exports.login = async (req, res, next) => {
   } catch (error) {
     return next(new ErrorResponse());
   }
+};
+
+exports.changePassword = async (req, res, next) => {
+  const user = await User.findOne({ _id: req._id });
+  if (!user) {
+    return next(new ErrorResponse("Can't find user account", 404));
+  }
+  const { oldPassword, newPassword } = req.body;
+  const comparePassword = await bcrypt.compare(oldPassword, user.password);
+  if (!comparePassword) {
+    return next(new ErrorResponse("Incorrect password", 404));
+  }
+  user.password = newPassword;
+  await user.save();
+  return next(new ErrorResponse("Password changed successfully", 200));
+};
+
+exports.forgotPassword = async (req, res, next) => {
+  const userEmail = await User.findOne({ email: req.body.email });
+  if (!userEmail) {
+    return next(new ErrorResponse("Account does not exist", 404));
+  }
+  const token = await randomBytes(20).toString("hex");
+  user.resetPasswordToken = token;
+  user.resetPasswordExpires = Date.now() + 360000; // 1 hour
+  await user.save();
+  const message = "You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n" +
+  "Please click on the following link, or paste this into your browser to complete the process:\n\n" +
+  "http://" +
+  req.headers.host +
+  "/reset/" +
+  token +
+  "\n\n" +
+  "If you did not request this, please ignore this email and your password will remain unchanged.\n",
+  await mailerTester(userEmail.email, message, "Password reset","info@eventPlanz.ng" )
 };
 
 exports.getUsersByLocation = async (req, res, next) => {
