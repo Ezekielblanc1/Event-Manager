@@ -7,8 +7,6 @@ const { mailerTester } = require("../helpers/emailHelper");
 const cloudinary = require("cloudinary");
 const ErrorResponse = require("../utils/errorResponse");
 
-
-
 exports.signUp = async (req, res, next) => {
   const { password, email, profileImage } = req.body;
   const data = {
@@ -90,15 +88,21 @@ exports.forgotPassword = async (req, res, next) => {
   user.resetPasswordToken = token;
   user.resetPasswordExpires = Date.now() + 360000; // 1 hour
   await user.save();
-  const message = "You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n" +
-  "Please click on the following link, or paste this into your browser to complete the process:\n\n" +
-  "http://" +
-  req.headers.host +
-  "/reset/" +
-  token +
-  "\n\n" +
-  "If you did not request this, please ignore this email and your password will remain unchanged.\n",
-  await mailerTester(userEmail.email, message, "Password reset","info@eventPlanz.ng" )
+  const message =
+    "You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n" +
+    "Please click on the following link, or paste this into your browser to complete the process:\n\n" +
+    "http://" +
+    req.headers.host +
+    "/reset/" +
+    token +
+    "\n\n" +
+    "If you did not request this, please ignore this email and your password will remain unchanged.\n";
+  await mailerTester(
+    userEmail.email,
+    message,
+    "Password reset",
+    "info@eventPlanz.ng"
+  );
 };
 
 exports.getUsersByLocation = async (req, res, next) => {
