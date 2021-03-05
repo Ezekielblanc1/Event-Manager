@@ -11,9 +11,9 @@ const Reserve = require("../models/Reserve");
 
 exports.createTalk = async (req, res, next) => {
   if (!req.body.title || !req.body.description) {
-    return next(
-      new ErrorResponse("You must provide title and description", 400)
-    );
+  return next(
+    new ErrorResponse("You must provide title and description", 400)
+  );
   }
   const talk = await Talk.findOne({ title: req.body.title });
   const user = await User.findOne({ _id: req._id });

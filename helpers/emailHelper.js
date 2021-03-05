@@ -1,27 +1,66 @@
 const nodeMailer = require("nodemailer");
 
-exports.mailerTester = async (emails, message, subject, fromWho) => {
-  // Generate test SMTP service account fromWho ethereal.email
-  // Only needed if you don't have a real mail account for testing
-  let testAccount = await nodeMailer.createTestAccount();
-  // create reusable transporter object using the default SMTP transport
-  const transporter = nodeMailer.createTransport({
-    host: "smtp.ethereal.email",
-    port: 587,
-    auth: {
-      user: testAccount.user, //"adelbert92@ethereal.email",
-      pass: testAccount.pass, //"ZbM88AbwFrnU5CuEpX",
-    },
-  });
+const isProd = process.env.NODE_ENV === "production";
 
-  // send mail with defined transport object
-  let info = await transporter.sendMail({
-    from: fromWho ? fromWho : '"Eventz" <info@eventz.ng>', // sender address
-    // bcc : fromWho ? "info@eventPlanz.ng" : emails , // list of receivers
-    to: fromWho ? "info@eventz.ng" : emails, // list of receivers
-    subject: subject, // Subject line
-    html: message, // html body
-  });
-  console.log("Message sent: %s", info.messageId);
-  console.log("Preview URL: %s", nodeMailer.getTestMessageUrl(info));
+const EmailSender = {
+  sendMail: async function (emails, message, subject, fromWho) {
+    isProd
+      ? await this.mailer(emails, message, subject, fromWho)
+      : await this.mailerTester(emails, message, subject, fromWho);
+  },
+
+  mailer: async function (emails, message, subject, fromWho) {
+    let transporter = nodeMailer.createTransport({
+      service: "gmail",
+      port: 465,
+      secure: true, // true for 465, false for other ports
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+      tls: { rejectUnauthorized: false },
+    });
+
+    // send mail with defined transport object
+    let mailData = await transporter.sendMail({
+      from: fromWho ? fromWho : `"Eventz" <${process.env.EMAIL_USER}>`,
+      to: emails,
+      subject: subject,
+      html: message,
+    });
+    console.info(mailData);
+
+    return "Done";
+  },
+
+  mailerTester: async function (emails, message, subject, fromWho) {
+    let testAccount = await nodeMailer.createTestAccount();
+
+    // create reusable transporter object using the default SMTP transport
+    let transporter = nodeMailer.createTransport({
+      host: "smtp.ethereal.email",
+      port: 587,
+      secure: false,
+      auth: {
+        user: testAccount.user,
+        pass: testAccount.pass,
+      },
+    });
+
+    // send mail with defined transport object
+    let mailData = await transporter.sendMail({
+      from: fromWho ? fromWho : '"Eventz" <info@eventz.ng>',
+      to: emails,
+      subject: subject,
+      html: message,
+    });
+
+    console.info("Preview URL: %s", nodeMailer.getTestMessageUrl(mailData));
+
+    return "done";
+  },
 };
+
+module.exports = EmailSender;
+
+
