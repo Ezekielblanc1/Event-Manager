@@ -52,7 +52,7 @@ exports.addReview = async (req, res, next) => {
 };
 
 exports.getAllRatings = async (req, res, next) => {
-  const talkId = req.body.talkId;
+  const talkId = req.params.talkId;
   const allRatings = await Review.find({ talkId }).populate(
     "userId",
     "firstName lastName"

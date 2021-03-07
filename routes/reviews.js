@@ -5,7 +5,7 @@ const isAuth = require("../middleware/isAuth");
 
 
 router.post('/:talkId', isAuth, addReview)
-router.get('/allRating', getAllRatings)
+router.get('/allRating/:talkId', getAllRatings)
 router.get('/talkByRating', getTalkByRating)
 // router.post('/')
 module.exports = router
