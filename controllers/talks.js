@@ -1,6 +1,6 @@
 const User = require("../models/User");
 const Talk = require("../models/Talks");
-const { calculateDiscount } = require("../helpers/index");
+const { calculateDiscount, escapeRegex } = require("../helpers/index");
 const sendSms = require("../helpers/sms");
 const {
   initializeTransaction,
@@ -247,10 +247,14 @@ exports.verifyTalkPay = async (req, res, next) => {
 };
 
 exports.searchTalk = async (req, res) => {
-  //Change t query params
-  const { title, description } = req.body;
-  const talk = await Talk.find({ $or: [{ title }, { description }] });
-  res.status(200).json({ success: true, data: talk });
+  if (req.query.search) {
+    const regex = new RegExp(escapeRegex(req.query.search), "gi");
+    const talks = await Talk.find({ title: regex });
+    res.status(200).json({ success: true, data: talks });
+  } else {
+    const talks = await Talk.find({});
+    res.status(200).json({ success: true, data: talks });
+  }
 };
 
 exports.askQuestion = async () => {};

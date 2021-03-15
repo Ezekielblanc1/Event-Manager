@@ -11,11 +11,14 @@ exports.calculateDiscount = (arr, price) => {
   }
 };
 
-
 exports.calcAverage = (arr) => {
   const total = arr.reduce((acc, val) => {
-    return acc + val
-  }, 0)
-  const average = total/ arr.length
-  return Math.round(average * 10) / 10
-}
+    return acc + val;
+  }, 0);
+  const average = total / arr.length;
+  return Math.round(average * 10) / 10;
+};
+
+exports.escapeRegex = (str) => {
+  return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+};
